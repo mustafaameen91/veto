@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Company {
+  idCompany     Int      @id @default(autoincrement())
+  componentName String   @db.VarChar(220)
+  expireDate    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  createdBy     Int
+  updatedAt     DateTime @default(now())
+  updatedBy     Int
+  users         User[]
+}
+
+model User {
+  idUser      Int      @id @default(autoincrement())
+  userName    String   @db.VarChar(220)
+  password    String   @db.VarChar(220)
+  salt        String   @db.VarChar(220)
+  role        Role     @relation(fields: [roleId], references: [idRole])
+  roleId      Int
+  company     Company  @relation(fields: [companyId], references: [idCompany])
+  companyId   Int
+  activeLogin Boolean  @default(true)
+  expireDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  createdBy   Int
+  updatedAt   DateTime @default(now())
+  updatedBy   Int
+}
+
+model Role {
+  idRole   Int    @id @default(autoincrement())
+  roleName String @db.VarChar(220)
+  User     User[]
+}
