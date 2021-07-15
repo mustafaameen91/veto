@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
@@ -11,35 +8,247 @@ generator client {
 }
 
 model Company {
-  idCompany     Int      @id @default(autoincrement())
-  componentName String   @db.VarChar(220)
-  expireDate    DateTime @default(now())
-  createdAt     DateTime @default(now())
-  createdBy     Int
-  updatedAt     DateTime @default(now())
-  updatedBy     Int
-  users         User[]
+  idCompany       Int             @id @default(autoincrement())
+  componentName   String          @db.VarChar(220)
+  expireDate      DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+  createdBy       Int
+  updatedAt       DateTime        @default(now())
+  updatedBy       Int
+  users           User[]
+  stores          Store[]
+  categories      Category[]
+  SellTypes       SellType[]
+  Districts       District[]
+  CustomerClasses CustomerClass[]
+  Customers       Customer[]
 }
 
 model User {
-  idUser      Int      @id @default(autoincrement())
-  userName    String   @db.VarChar(220)
-  password    String   @db.VarChar(220)
-  salt        String   @db.VarChar(220)
-  role        Role     @relation(fields: [roleId], references: [idRole])
-  roleId      Int
-  company     Company  @relation(fields: [companyId], references: [idCompany])
-  companyId   Int
-  activeLogin Boolean  @default(true)
-  expireDate  DateTime @default(now())
-  createdAt   DateTime @default(now())
-  createdBy   Int
-  updatedAt   DateTime @default(now())
-  updatedBy   Int
+  idUser          Int              @id @default(autoincrement())
+  userName        String           @db.VarChar(220)
+  password        String           @db.VarChar(220)
+  salt            String           @db.VarChar(220)
+  role            Role             @relation(fields: [roleId], references: [idRole])
+  roleId          Int
+  company         Company          @relation(fields: [companyId], references: [idCompany])
+  companyId       Int
+  activeLogin     Boolean          @default(true)
+  expireDate      DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+  createdBy       Int
+  updatedAt       DateTime         @default(now())
+  updatedBy       Int
+  UserPermissions UserPermission[]
+  permissions     Permission[]
+  UserStores      UserStore[]
+  Invoices        Invoice[]
 }
 
 model Role {
   idRole   Int    @id @default(autoincrement())
   roleName String @db.VarChar(220)
   User     User[]
+}
+
+model UserPermission {
+  idUserPermission Int        @id @default(autoincrement())
+  company          Permission @relation(fields: [permissionId], references: [idPermission])
+  permissionId     Int
+  user             User       @relation(fields: [userId], references: [idUser])
+  userId           Int
+}
+
+model Permission {
+  idPermission    Int              @id @default(autoincrement())
+  permissionName  String           @db.VarChar(220)
+  UserPermissions UserPermission[]
+  users           User[]
+}
+
+model Store {
+  idStore    Int         @id @default(autoincrement())
+  storeName  String      @db.VarChar(220)
+  company    Company     @relation(fields: [companyId], references: [idCompany])
+  companyId  Int
+  UserStores UserStore[]
+  ItemStores ItemStore[]
+  Invoices   Invoice[]
+}
+
+model UserStore {
+  idUserStore Int   @id @default(autoincrement())
+  users       User  @relation(fields: [userId], references: [idUser])
+  userId      Int
+  stores      Store @relation(fields: [storeId], references: [idStore])
+  storeId     Int
+}
+
+model Category {
+  idCategory   Int     @id @default(autoincrement())
+  categoryName String  @db.VarChar(220)
+  company      Company @relation(fields: [companyId], references: [idCompany])
+  companyId    Int
+  items        Item[]
+}
+
+model Discount {
+  idDiscount   Int           @id @default(autoincrement())
+  discountName String        @db.VarChar(220)
+  InvoiceItems InvoiceItem[]
+}
+
+model Item {
+  idItem          Int           @id @default(autoincrement())
+  itemName        String        @db.VarChar(220)
+  itemCode        String        @db.VarChar(220)
+  itemDescription String        @db.Text
+  isAvailable     Boolean       @default(true)
+  itemBarcode     String        @db.VarChar(220)
+  category        Category      @relation(fields: [categoryId], references: [idCategory])
+  categoryId      Int
+  createdAt       DateTime      @default(now())
+  createdBy       Int
+  updatedAt       DateTime      @default(now())
+  updatedBy       Int
+  ItemPrices      ItemPrice[]
+  ItemStores      ItemStore[]
+  ItemImages      ItemImage[]
+  InvoiceItems    InvoiceItem[]
+}
+
+model ItemPrice {
+  idItemPrice Int      @id @default(autoincrement())
+  item        Item     @relation(fields: [itemId], references: [idItem])
+  itemId      Int
+  sellType    SellType @relation(fields: [sellTypeId], references: [idSellType])
+  sellTypeId  Int
+  price       Float
+
+}
+
+model ItemImage {
+  idItemImage Int      @id @default(autoincrement())
+  imagePath   String   @db.VarChar(220)
+  item        Item     @relation(fields: [itemId], references: [idItem])
+  itemId      Int
+  createdAt   DateTime @default(now())
+  createdBy   Int
+  updatedAt   DateTime @default(now())
+  updatedBy   Int
+}
+
+model SellType {
+  idSellType   Int         @id @default(autoincrement())
+  sellTypeName String      @db.VarChar(220)
+  company      Company     @relation(fields: [companyId], references: [idCompany])
+  companyId    Int
+  itemPrices   ItemPrice[]
+  Customers    Customer[]
+  Invoices     Invoice[]
+}
+
+model ItemStore {
+  idItemStore  Int   @id @default(autoincrement())
+  item         Item  @relation(fields: [itemId], references: [idItem])
+  itemId       Int
+  store        Store @relation(fields: [storeId], references: [idStore])
+  storeId      Int
+  itemQuantity Int
+}
+
+model Province {
+  idProvince   Int        @id @default(autoincrement())
+  provinceName String     @db.VarChar(220)
+  Districts    District[]
+}
+
+model District {
+  idDistrict   Int        @id @default(autoincrement())
+  districtName String     @db.VarChar(220)
+  province     Province   @relation(fields: [provinceId], references: [idProvince])
+  provinceId   Int
+  company      Company    @relation(fields: [companyId], references: [idCompany])
+  companyId    Int
+  Customers    Customer[]
+}
+
+model CustomerClass {
+  idCustomerClass Int        @id @default(autoincrement())
+  className       String     @db.VarChar(220)
+  company         Company    @relation(fields: [companyId], references: [idCompany])
+  companyId       Int
+  Customers       Customer[]
+}
+
+model Customer {
+  idCustomer      Int           @id @default(autoincrement())
+  customerName    String        @db.VarChar(220)
+  customerPhones  String        @db.VarChar(220)
+  storeName       String        @db.VarChar(220)
+  location        String        @db.VarChar(220)
+  sellType        SellType      @relation(fields: [sellTypeId], references: [idSellType])
+  sellTypeId      Int
+  district        District      @relation(fields: [districtId], references: [idDistrict])
+  districtId      Int
+  nearby          String        @db.VarChar(220)
+  visitDay        String        @db.VarChar(220)
+  secondVisitDay  String        @db.VarChar(220)
+  visitTime       String        @db.VarChar(220)
+  customerClass   CustomerClass @relation(fields: [customerClassId], references: [idCustomerClass])
+  customerClassId Int
+  company         Company       @relation(fields: [companyId], references: [idCompany])
+  companyId       Int
+  createdAt       DateTime      @default(now())
+  createdBy       Int
+  updatedAt       DateTime      @default(now())
+  updatedBy       Int
+  Invoices        Invoice[]
+}
+
+model InvoiceType {
+  idInvoiceType   Int             @id @default(autoincrement())
+  invoiceTypeName String          @db.VarChar(220)
+  invoiceFunction InvoiceFunction
+  invoices        Invoice[]
+}
+
+enum InvoiceFunction {
+  MINUS
+  PLUS
+}
+
+model Invoice {
+  idInvoice     Int           @id @default(autoincrement())
+  invoiceType   InvoiceType   @relation(fields: [invoiceTypeId], references: [idInvoiceType])
+  invoiceTypeId Int
+  customer      Customer      @relation(fields: [customerId], references: [idCustomer])
+  customerId    Int
+  store         Store         @relation(fields: [storeId], references: [idStore])
+  storeId       Int
+  notice        String        @db.Text
+  isCash        Boolean       @default(true)
+  sellType      SellType      @relation(fields: [sellTypeId], references: [idSellType])
+  sellTypeId    Int
+  delivery      User          @relation(fields: [deliveryId], references: [idUser])
+  deliveryId    Int
+  createdAt     DateTime      @default(now())
+  createdBy     Int
+  updatedAt     DateTime      @default(now())
+  updatedBy     Int
+  InvoiceItems  InvoiceItem[]
+}
+
+model InvoiceItem {
+  idInvoiceItem  Int      @id @default(autoincrement())
+  invoice        Invoice  @relation(fields: [invoiceId], references: [idInvoice])
+  invoiceId      Int
+  item           Item     @relation(fields: [itemId], references: [idItem])
+  itemId         Int
+  quantity       Float
+  discount       Int
+  discountType   Discount @relation(fields: [discountId], references: [idDiscount])
+  discountId     Int
+  price          Float
+  totalPriceItem Float
 }
